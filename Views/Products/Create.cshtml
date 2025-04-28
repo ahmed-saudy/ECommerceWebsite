@@ -1,0 +1,270 @@
+﻿@model ECommerceWebsite.Models.DB.Product
+@inject ECommerceWebsite.Models.DB.ECommerceProjectContext _Context
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+<style>
+    .preview-img {
+    width: 100px; /* Change this to any size you want */
+    height: 100px;
+    object-fit: cover;
+    margin: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    }
+</style>
+<h4>Product</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4" >
+        <form asp-action="Create" enctype="multipart/form-data" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="InSection" class="control-label"></label>
+                <input asp-for="InSection" class="form-control" />
+                <span asp-validation-for="InSection" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ShortDescription" class="control-label"></label>
+                <textarea asp-for="ShortDescription" class="form-control"></textarea>
+                <span asp-validation-for="ShortDescription" class="text-danger"></span>
+            </div> 
+            <div class="form-group">
+                <label asp-for="LongDescription" class="control-label"></label>
+                <textarea asp-for="LongDescription" class="form-control"></textarea>
+                <span asp-validation-for="LongDescription" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Price" class="control-label" ></label>
+                <input asp-for="Price" class="form-control" type="number" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="StockQuantity" class="control-label"></label>
+                <input asp-for="StockQuantity" class="form-control" type="number" />
+                <span asp-validation-for="StockQuantity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CategoryID" class="control-label"></label>
+                @{
+                    var categories = _Context.Categories
+                    .Select(d => new SelectListItem
+                    {
+                        Value = d.CategoryID.ToString(),  // or whatever ID field you have
+                        Text = d.CategoryName
+                    })
+                            .ToList();
+                }
+                <select asp-for="@Model.CategoryID" class="form-control" asp-items="categories">
+                    <option value="">Select a Category</option> <!-- Optional placeholder -->
+                </select>
+            </div>
+
+
+            <div class="form-group">
+                <label asp-for="ImageName" class="control-label">Main Image</label>
+                <input asp-for="ImageName" id="GallaryClassInput" name="MainImage" accept="image/*" type="file" class="form-control" placeholder="Select The Main Image" />
+
+                <div class="row" id="GallaryClass">
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="/Scripts/move-top.js"></script>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+
+
+
+
+
+
+
+<script>
+
+
+
+             var GallaryClass = document.getElementById("GallaryClass");
+             var GallaryClass1 = document.getElementById("GallaryClass1");
+             var GallaryClassInput = document.getElementById("GallaryClassInput");
+             var GallaryClassInput1 = document.getElementById("GallaryClassInput1");
+
+
+          // ==============Event handler for multiple files==============
+          // Main Image
+          GallaryClassInput.addEventListener("change",()=>{
+             GallaryClass.innerHTML="";
+                var files = event.target.files;
+                  Array.from(files).forEach((file,index) => {
+                  var reader = new FileReader();
+
+                  reader.onload = function(e) {
+                    GallaryClass.innerHTML += `
+                              <div class="col-md-3 col-12" id="div${index}">
+                              <img src="${e.target.result}" class="img-thumbnail" id="i${index}" />
+                               <input type="hidden" value="${file.name}"/>
+                             <a class="btn btn-danger w-100" href="#" onclick="DeleteGallaryImageOnClick(this.parentElement,${index}) ">
+                          Delete
+                        </a>
+                      </div>`;
+                  };
+
+                  reader.readAsDataURL(file); // Read file as Data URL
+             });
+
+          });
+
+
+          // ==============End Event handler for multiple files==============
+
+           // ==============Event handler for multiple files==============
+           // Galary
+          GallaryClassInput1.addEventListener("change",()=>{
+             GallaryClass1.innerHTML="";
+                var files = event.target.files;
+                  Array.from(files).forEach((file,index) => {
+                  var reader = new FileReader();
+
+                  reader.onload = function(e) {
+                    GallaryClass1.innerHTML += `
+                              <div class="col-md-3 col-12" id="div${index}">
+                              <img src="${e.target.result}" class="img-thumbnail" id="i${index}" />
+                               <input type="hidden" value="${file.name}"/>
+                             <a class="btn btn-danger w-100" href="#" onclick="DeleteGallaryImageOnClick1(this.parentElement,${index}) ">
+                          Delete
+                        </a>
+                      </div>`;
+                  };
+
+                  reader.readAsDataURL(file); // Read file as Data URL
+             });
+
+          });
+
+
+          // ==============End Event handler for multiple files==============
+
+
+
+
+    // ===============DeletGalllaryImage=================
+            function DeleteGallaryImageOnClick(item,fileIndex){
+               var elementToDelete = document.getElementById(item.id); // Get element by ID
+                 if(elementToDelete!=null){
+
+                     // alert(`${imageToBeRemoved.src}`);
+                    removeFile(item,fileIndex);
+                   /// Remove the element from the DOM
+                 };
+             };
+    // ========================DeletGalllaryImage==========
+
+    // ===============DeletGalllaryImage=================
+            function DeleteGallaryImageOnClick1(item,fileIndex){
+               var elementToDelete = document.getElementById(item.id); // Get element by ID
+                 if(elementToDelete!=null){
+
+                     // alert(`${imageToBeRemoved.src}`);
+                    removeFile1(item,fileIndex);
+                   /// Remove the element from the DOM
+                 };
+             };
+    // ========================DeletGalllaryImage==========
+
+
+       // // ========remove the file from the selected files==========
+        function removeFile(item,fileIndex) {
+            var dataTransfer = new DataTransfer();
+              GallaryClassInput = document.getElementById("GallaryClassInput");
+              var elementToDelete = document.getElementById(item.id);
+              var hiddenInput= elementToDelete.children[1];
+
+
+            var files =  Array.from(GallaryClassInput.files)  ;
+              GallaryClassInput.files=dataTransfer.files;
+
+            var ind=  parseInt(fileIndex);
+
+            for(var i=0 ;i<files.length;i++){
+
+                if(hiddenInput.value !==files[i].name){
+
+                    dataTransfer.items.add(files[i]);
+
+                }
+            };
+            elementToDelete.remove();
+            GallaryClassInput.files = dataTransfer.files;
+        };
+
+       //   // ======================================
+
+
+
+       // // ========remove the file from the selected Gallary files==========
+        function removeFile1(item,fileIndex) {
+            var dataTransfer = new DataTransfer();
+              GallaryClassInput1 = document.getElementById("GallaryClassInput1");
+              var elementToDelete = document.getElementById(item.id);
+              var hiddenInput= elementToDelete.children[1];
+
+
+            var files =  Array.from(GallaryClassInput1.files)  ;
+              GallaryClassInput1.files=dataTransfer.files;
+
+            var ind=  parseInt(fileIndex);
+
+            for(var i=0 ;i<files.length;i++){
+
+                if(hiddenInput.value !==files[i].name){
+
+                    dataTransfer.items.add(files[i]);
+
+                }
+            };
+            elementToDelete.remove();
+            GallaryClassInput1.files = dataTransfer.files;
+        };
+
+       //   // ======================================
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
+
+
+
+
+
